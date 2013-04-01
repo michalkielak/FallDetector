@@ -1,6 +1,11 @@
 package pl.kielak.fd;
 
 public class Settings{
+	/**
+	 * Settings class. Used to make code more readable and collect major
+	 * constants in one place.
+	 * @author Michal Kielak
+	 */
 	
 	//used when converting nanoseconds to seconds
 	public static long ONE_BILION = 1000000000;

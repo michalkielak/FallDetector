@@ -6,6 +6,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 public class DatabaseManager extends SQLiteOpenHelper {
 	/**
@@ -87,7 +88,6 @@ public class DatabaseManager extends SQLiteOpenHelper {
         values.put(KEY_ACCEL_TOTAL, accelMeasure.getTotalAccel());
 
         db.insert(TABLE_ACCELEROMETER, null, values);
-        db.close();
     }
 
 
@@ -95,23 +95,22 @@ public class DatabaseManager extends SQLiteOpenHelper {
     	
         SQLiteDatabase db = this.getReadableDatabase();
         ArrayList<AccelerometerMeasure> accelMeasures = 
-        									new ArrayList<AccelerometerMeasure>();
+        								new ArrayList<AccelerometerMeasure>();
  
         Cursor cursor = db.query(TABLE_ACCELEROMETER, new String[] 
-        		{ KEY_ACCEL_TIME, KEY_ACCEL_X, KEY_ACCEL_Y, KEY_ACCEL_Z }, 
-        		KEY_ACCEL_TIME + ">?", new String[]{ String.valueOf(time)},
-        		null, null, null, null);
+        		{ KEY_ACCEL_TIME, KEY_ACCEL_X, KEY_ACCEL_Y, KEY_ACCEL_Z,
+        		KEY_ACCEL_TOTAL}, KEY_ACCEL_TIME + ">?", 
+        		new String[]{ String.valueOf(time)}, null, null, null, null);
         
         if (cursor != null)
             cursor.moveToFirst();
-        
-        while (cursor.isAfterLast()==false){
-        	accelMeasures.add(new AccelerometerMeasure(cursor.getInt(0),
+
+        while (cursor.moveToNext()){
+        	accelMeasures.add(new AccelerometerMeasure(cursor.getLong(0),
                 cursor.getFloat(1), cursor.getFloat(2), cursor.getFloat(3),
                 cursor.getFloat(4)));
         }
-        
-        // return contact
+        cursor.close();
         return accelMeasures;
     }
     
@@ -126,7 +125,6 @@ public class DatabaseManager extends SQLiteOpenHelper {
         values.put(KEY_GYRO_Z, accelMeasure.getzSpeed());
 
         db.insert(TABLE_GYROSCOPE, null, values);
-        db.close();
     }
  
 
@@ -145,11 +143,11 @@ public class DatabaseManager extends SQLiteOpenHelper {
             cursor.moveToFirst();
         
         while (cursor.isAfterLast()==false){
-        	gyroMeasures.add(new GyroscopeMeasure(cursor.getInt(0),
+        	gyroMeasures.add(new GyroscopeMeasure(cursor.getLong(0),
                 cursor.getFloat(1), cursor.getFloat(2), cursor.getFloat(3)));
         }
         
-        // return contact
+        cursor.close();
         return gyroMeasures;
     }
     
@@ -160,7 +158,6 @@ public class DatabaseManager extends SQLiteOpenHelper {
     			 			+String.valueOf(beginTime), null).moveToFirst() ;
     	 db.rawQuery("DELETE FROM " + TABLE_GYROSCOPE +" WHERE time < " 
     			 			+String.valueOf(beginTime), null).moveToFirst() ;
-    	 db.close();
     }
     
 }

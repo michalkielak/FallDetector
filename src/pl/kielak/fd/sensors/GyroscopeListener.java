@@ -26,8 +26,9 @@ public class GyroscopeListener implements SensorEventListener {
     
     @Override
     public void onSensorChanged(SensorEvent event) {
+    	long currentTime = System.currentTimeMillis();
 	    GyroscopeMeasure mMeasure = new GyroscopeMeasure(
-	    		event.timestamp, event.values[0], event.values[1], 
+	    		currentTime, event.values[0], event.values[1], 
 	    		event.values[2]);
 	    
 	    db.addGyroMeasure(mMeasure);

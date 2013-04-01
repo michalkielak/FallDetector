@@ -1,41 +1,37 @@
 package pl.kielak.fd.algorithms;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import android.content.Context;
-import android.os.Vibrator;
-import android.widget.Toast;
+import android.util.Log;
 import pl.kielak.fd.database.AccelerometerMeasure;
 import pl.kielak.fd.database.Measure;
 import pl.kielak.fd.Settings;
 
 
 public class AccelerometerAlgorithm implements FallDetectionAlgorithm{
-
-//	private boolean freeFall = false;
-//	private double freeFallTime = 0;
-//	private double lastFreeFallTime = 0;
-//	private final double freeFallThreshold = 1;
-//	private final double freeFallTimeThreshold = 0.2;
-//	
-//	private boolean peak = false;
-//	private final double peakThreshold = 19;
-//	private double fps;
+	/**
+	 * Implementation of FallDetectionAlgorithm based on accelerometer.
+	 * Algorithm detects sudden decrease of total acceleration (free float),
+	 * peak (when person hit the ground) and count time without any move.
+	 * Constants for every state can be changed.
+	 * @author Michal Kielak
+	 */
 	
 	private AccelerometerMeasure measure;
 	private AccelerometerMeasure nextMeasure;
 	
 	private enum States {NORMAL, FREE_FLOAT, PEAK, LYING, FALL_DETECTED};
 	
-	private float[] thresholds = {0f, 7f, 18f, 12f};
-	private float[] minDuration = {0f, 0.2f, 0f, 2f};
-	private float[] maxDuration = {Settings.ALGORITHM_WINDOW, 3f, 0.4f, 
-													Settings.ALGORITHM_WINDOW};
+	private final float[] thresholds = {0f, 7f, 16f, 12f, 12f};
+	private final float[] minDuration = {0f, 0.1f, 0f, 2f};
+	private final float[] maxDuration = {Settings.ALGORITHM_WINDOW, 3f, 0.4f, 
+												Settings.ALGORITHM_WINDOW};
 	private States state;
+	private int stateNo=0;
 	private float currentStateTime = 0;
+	private float smallest = 10f;
 	
 	public AccelerometerAlgorithm(){
 		state = States.NORMAL;
@@ -44,78 +40,56 @@ public class AccelerometerAlgorithm implements FallDetectionAlgorithm{
 	@Override
 	public boolean run(List<AccelerometerMeasure> measures) {
 		Iterator<AccelerometerMeasure> i = measures.iterator();
-		
+		stateNo=0;
+		currentStateTime = 0;
+		state = States.NORMAL;
 		try{
 			measure = i.next();
 		}catch( NoSuchElementException e ){
 			return false;
 		}
-		
-		for (; i.hasNext();){
+		int iterations = 0;
+		for (; i.hasNext();iterations++){
 			nextMeasure = i.next();
-			currentStateTime+=(nextMeasure.getTime()-measure.getTime())/
-															Settings.ONE_BILION;
+			currentStateTime+=(nextMeasure.getTime()-measure.getTime())/1000f;
 			
-			if (measure.getTotalAccel() > thresholds[state.ordinal()+1] && 
-						minDuration[state.ordinal()] < currentStateTime && 
-						currentStateTime < maxDuration[state.ordinal()])
+			if (measure.getTotalAccel() < smallest)
+				smallest = measure.getTotalAccel();
+			
+			if ((stateNo==0 || stateNo==2 || stateNo==3) && 
+					measure.getTotalAccel() < thresholds[stateNo+1] && 
+					minDuration[stateNo] < currentStateTime && 
+					currentStateTime < maxDuration[stateNo])
 			{
-				state = States.values()[state.ordinal()+1];
-				
+				state = States.values()[++stateNo];
+				Log.e("State:", state.toString());
+				currentStateTime = 0;
 				if (state==States.FALL_DETECTED)
 					return true;
 			}
+			
+			else if (stateNo !=0 && stateNo !=2 && stateNo !=3 &&
+					measure.getTotalAccel() > thresholds[stateNo+1] && 
+					minDuration[stateNo] < currentStateTime && 
+					currentStateTime < maxDuration[stateNo])
+			{
+				state = States.values()[++stateNo];
+				Log.e("State:", state.toString());
+				currentStateTime = 0;
+				if (state==States.FALL_DETECTED)
+					return true;
+			}
+			
+			else if(currentStateTime > maxDuration[stateNo])
+			{
+				state = States.NORMAL;
+				stateNo = 0;
+				currentStateTime = 0;
+			}
+			
+			measure=nextMeasure;
 		}
+		smallest = 10f;
 		return false;
 	}
 }
-//	
-//		currentFPS++;
-//		if(System.currentTimeMillis() - start >= 1000) {
-//		    fps = currentFPS;
-//		    currentFPS = 0;
-//		    start = System.currentTimeMillis();
-//		}
-//		
-//		
-//		//begining of free fall
-//		if (values[3] < freeFallThreshold && !freeFall){
-//			freeFall = true;
-//			freeFallTime = 0;
-//		
-//		}
-//		//free fall continuation
-//		else if(values[3] < freeFallThreshold && freeFall){
-//			freeFallTime+=1d/fps;
-//		}
-//		//end of free fall; counting time
-//		else if(freeFall && values[3] > freeFallThreshold && values[3] < peakThreshold)
-//		{
-//			lastFreeFallTime = 1/fps;
-//		}
-//		//counting time from last free fall
-//		else if(lastFreeFallTime > 0){
-//			lastFreeFallTime += 1/fps;
-//		}
-//		
-//		else if(values[3] > peakThreshold && freeFall){
-//			peak = true;
-//			freeFall = false;
-//			lastFreeFallTime = 0;
-//			Toast.makeText(getApplicationContext(), "Fall detected", Toast.LENGTH_LONG).show();
-//			// Get instance of Vibrator from current Context
-//			Vibrator mVibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-//			 
-//			// Vibrate for 300 milliseconds
-//			mVibrator.vibrate(1000);
-//			
-//		}
-//		
-//		else if (peak && values[3] < peakThreshold){
-//			peak = false;
-//			freeFall = false;
-//		}
-//		return false;
-//	}
-//
-//}

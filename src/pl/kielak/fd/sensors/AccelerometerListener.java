@@ -8,8 +8,8 @@ import android.hardware.SensorEventListener;
 
 public class AccelerometerListener implements SensorEventListener {
 	/**
-	 * Listener of accelerometer. It collect every measure from accelerometer
-	 * and put it into table accelerometer in DB.
+	 * Listener of accelerometer. It collects measures from accelerometer
+	 * and put them into database.
 	 * @author Michal Kielak
 	 */
 	
@@ -26,16 +26,15 @@ public class AccelerometerListener implements SensorEventListener {
     
     @Override
     public void onSensorChanged(SensorEvent event) {
-
+    	long currentTime = System.currentTimeMillis();
 	    float totalAccel = (float)Math.sqrt(Math.pow(event.values[0],2.0)
 	    								+Math.pow(event.values[1],2.0)
 	    								+Math.pow(event.values[2],2.0));
 	    AccelerometerMeasure mMeasure = new AccelerometerMeasure(
-	    		event.timestamp, event.values[0], event.values[1], 
+	    		currentTime, event.values[0], event.values[1], 
 	    		event.values[2], totalAccel);
 	    
 	    db.addAccelMeasure(mMeasure);
-//	    db.deleteOldMeasures(event.timestamp - 15*1000000000);
     }
 	    
 }

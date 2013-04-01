@@ -11,6 +11,13 @@ import pl.kielak.fd.database.DatabaseManager;
 import pl.kielak.fd.database.GyroscopeMeasure;
 
 public class AlgorithmsManager {
+	/**
+	 * Algorithms manager is responsible for activating algorithms, collecting 
+	 * appropriate data from database and deliver them to algorithms.
+	 * If all algorithms return fall detection, FallAlarm object will be
+	 * called.
+	 * @author Michal Kielak
+	 */
 	
 	private final AccelerometerAlgorithm mAccelerometerAlgorithm;
 	private final GyroscopeAlgorithm mGyroscopeAlgorithm;
@@ -39,13 +46,14 @@ public class AlgorithmsManager {
 
 		@Override
 		public void run() {
-			long algorithmTimeStart = (System.currentTimeMillis()
-						*Settings.ONE_MILION) - (Settings.ALGORITHM_WINDOW
-						*Settings.ONE_BILION);
+			algorithmTimeStart = System.currentTimeMillis() - 
+												1000*Settings.ALGORITHM_WINDOW;
+			
 			mAccelerometerMeasures = db.getAccelerometerMeasures(
 															algorithmTimeStart);
 			
 			fallDetected = mAccelerometerAlgorithm.run(mAccelerometerMeasures);
+		    db.deleteOldMeasures(System.currentTimeMillis() - 15*1000);
 			if (fallDetected)
 				mFallAlarm.performAlarm();
 		}
