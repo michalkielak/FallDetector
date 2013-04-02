@@ -8,7 +8,7 @@ import pl.kielak.fd.FallAlarm;
 import pl.kielak.fd.Settings;
 import pl.kielak.fd.database.AccelerometerMeasure;
 import pl.kielak.fd.database.DatabaseManager;
-import pl.kielak.fd.database.GyroscopeMeasure;
+import pl.kielak.fd.database.RotationMeasure;
 
 public class AlgorithmsManager {
 	/**
@@ -20,20 +20,20 @@ public class AlgorithmsManager {
 	 */
 	
 	private final AccelerometerAlgorithm mAccelerometerAlgorithm;
-	private final GyroscopeAlgorithm mGyroscopeAlgorithm;
+	private final RotationAlgorithm mRotationAlgorithm;
 	private final DatabaseManager db;
 	private final Timer algorithmSchedule;
 	private final AlgorithmsTask mAlgorithmsTask;
 	private final FallAlarm mFallAlarm;
 	
 	private List<AccelerometerMeasure> mAccelerometerMeasures;
-	private List<GyroscopeMeasure> mGyroscopeMeasures;
+	private List<RotationMeasure> mRotationMeasures;
 	private long algorithmTimeStart;
 	private boolean fallDetected;
 	
 	public AlgorithmsManager(DatabaseManager db, FallAlarm fallAlarm){
 		mAccelerometerAlgorithm = new AccelerometerAlgorithm();
-		mGyroscopeAlgorithm = new GyroscopeAlgorithm();
+		mRotationAlgorithm = new RotationAlgorithm();
 		mAlgorithmsTask = new AlgorithmsTask();
 		mFallAlarm = fallAlarm;
 		this.db = db;
@@ -49,10 +49,14 @@ public class AlgorithmsManager {
 			algorithmTimeStart = System.currentTimeMillis() - 
 												1000*Settings.ALGORITHM_WINDOW;
 			
-			mAccelerometerMeasures = db.getAccelerometerMeasures(
-															algorithmTimeStart);
-			
-			fallDetected = mAccelerometerAlgorithm.run(mAccelerometerMeasures);
+//			mAccelerometerMeasures = db.getAccelerometerMeasures(
+//															algorithmTimeStart);
+//			
+//			fallDetected = mAccelerometerAlgorithm.run(mAccelerometerMeasures);
+//			if (fallDetected){
+				mRotationMeasures = db.getRotationMeasures(algorithmTimeStart);
+				fallDetected = mRotationAlgorithm.run(mRotationMeasures);
+//			}
 		    db.deleteOldMeasures(System.currentTimeMillis() - 15*1000);
 			if (fallDetected)
 				mFallAlarm.performAlarm();

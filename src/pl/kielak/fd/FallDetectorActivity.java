@@ -5,35 +5,19 @@ import java.util.Vector;
 import pl.kielak.fd.algorithms.AlgorithmsManager;
 import pl.kielak.fd.database.DatabaseManager;
 import pl.kielak.fd.sensors.AccelerometerListener;
-import pl.kielak.fd.sensors.GyroscopeListener;
-
-import com.jjoe64.graphview.GraphView;
-import com.jjoe64.graphview.GraphView.GraphViewData;
-import com.jjoe64.graphview.GraphViewSeries;
-import com.jjoe64.graphview.LineGraphView;
+import pl.kielak.fd.sensors.RotationListener;
 
 import android.app.Activity;
 import android.content.Context;
 import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
-import android.os.Vibrator;
-import android.text.Layout;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.widget.GridLayout;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
-import android.widget.Toast;
 
 public class FallDetectorActivity extends Activity{
 
 	private SensorManager mSensorManager;
 	private AccelerometerListener mAccelerometerListener;
-	private GyroscopeListener mGyroscopeListener;
+	private RotationListener mRotationListener;
 	private AlgorithmsManager mAlgorithmsManager;
 	private FallAlarm mFallAlarm;
 	
@@ -57,16 +41,17 @@ public class FallDetectorActivity extends Activity{
     	mFallAlarm = new FallAlarm(this.getApplicationContext());
     	
     	mAccelerometerListener = new AccelerometerListener(db);
-    	mGyroscopeListener = new GyroscopeListener(db);
+//    	mRotationListener = new RotationListener(db, mSensorManager);
         mSensorManager = (SensorManager) getSystemService(
         												Context.SENSOR_SERVICE);
         mAccelerometer = mSensorManager.getDefaultSensor(
         											Sensor.TYPE_ACCELEROMETER);
-        mGyroscope = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+//        mGyroscope = mSensorManager.getDefaultSensor(
+//        										Sensor.TYPE_ROTATION_VECTOR);
         mSensorManager.registerListener(mAccelerometerListener, mAccelerometer,
         									SensorManager.SENSOR_DELAY_GAME);
-        mSensorManager.registerListener(mGyroscopeListener, mGyroscope,
-        									SensorManager.SENSOR_DELAY_GAME);
+//        mSensorManager.registerListener(mRotationListener, mGyroscope,
+//        									SensorManager.SENSOR_DELAY_GAME);
         
         mAlgorithmsManager = new AlgorithmsManager(db, mFallAlarm);
         
@@ -76,7 +61,7 @@ public class FallDetectorActivity extends Activity{
     	super.onResume();
         mSensorManager.registerListener(mAccelerometerListener, mAccelerometer,
 				SensorManager.SENSOR_DELAY_GAME);
-        mSensorManager.registerListener(mGyroscopeListener, mGyroscope,
+        mSensorManager.registerListener(mRotationListener, mGyroscope,
 				SensorManager.SENSOR_DELAY_GAME);
     }
     

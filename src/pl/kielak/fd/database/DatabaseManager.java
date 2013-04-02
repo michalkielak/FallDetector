@@ -6,28 +6,26 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
 public class DatabaseManager extends SQLiteOpenHelper {
 	/**
-	 * DatabaseManager is responsible for all operations on db like insert
-	 * measure data from sensors, read them or delete.
+	 * DatabaseManager is responsible for all operations on db like inserting
+	 * measures data, reading them or deleting.
 	 * Database has 2 tables
 	 * table accelerometer
 	 * TIME (int, PK) | X_ACCEL (real) | Y_ACCEL (real) | Z_ACCEL (real) 
 	 * 													| TOTAL_ACCEL (real)
 	 * 
-	 * table gyroscope
-	 * TIME (int, PK) | X_SPEED (real) | Y_SPEED (real) | Z_SPEED (real)
+	 * table rotation
+	 * TIME (int, PK) | X_ROT (real) | Y_ROT (real) | Z_ROT (real)
 	 * @author Michal Kielak
 	 */
 
     private static final int DATABASE_VERSION = 1;
-    
     private static final String DATABASE_NAME = "measureStorage";
     
     private static final String TABLE_ACCELEROMETER = "accelerometer";
-    private static final String TABLE_GYROSCOPE = "gyroscope";
+    private static final String TABLE_ROTATION = "rotation";
     
     //Accelerometer fields
     private static final String KEY_ACCEL_TIME = "time";
@@ -36,11 +34,11 @@ public class DatabaseManager extends SQLiteOpenHelper {
     private static final String KEY_ACCEL_Z = "z_accel";
     private static final String KEY_ACCEL_TOTAL = "total_accel";
     
-    //Gyroscope fields
-    private static final String KEY_GYRO_TIME = "time";
-    private static final String KEY_GYRO_X = "x_speed";
-    private static final String KEY_GYRO_Y = "y_speed";
-    private static final String KEY_GYRO_Z = "z_speed";
+    //Rotation fields
+    private static final String KEY_ROT_TIME = "time";
+    private static final String KEY_ROT_X = "x_rotation";
+    private static final String KEY_ROT_Y = "y_rotation";
+    private static final String KEY_ROT_Z = "z_rotation";
     
     public DatabaseManager(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -57,11 +55,11 @@ public class DatabaseManager extends SQLiteOpenHelper {
         		+ KEY_ACCEL_TOTAL + " REAL );";
         
         String CREATE_GYROSCOPE_TABLE = "CREATE TABLE "
-        		+ TABLE_GYROSCOPE+ " ( "
-        		+ KEY_GYRO_TIME + " INTEGER PRIMARY KEY, " 
-        		+ KEY_GYRO_X + " REAL, "
-                + KEY_GYRO_Y + " REAL, "
-        		+ KEY_GYRO_Z + " REAL );";
+        		+ TABLE_ROTATION+ " ( "
+        		+ KEY_ROT_TIME + " INTEGER PRIMARY KEY, " 
+        		+ KEY_ROT_X + " REAL, "
+                + KEY_ROT_Y + " REAL, "
+        		+ KEY_ROT_Z + " REAL );";
         
         db.execSQL(CREATE_ACCELEROMETER_TABLE);
         db.execSQL(CREATE_GYROSCOPE_TABLE);
@@ -71,7 +69,7 @@ public class DatabaseManager extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         // Drop older table if existed
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_ACCELEROMETER);
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_GYROSCOPE);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_ROTATION);
  
         // Create tables again
         onCreate(db);
@@ -115,40 +113,40 @@ public class DatabaseManager extends SQLiteOpenHelper {
     }
     
     
-    public void addGyroMeasure(GyroscopeMeasure accelMeasure) {
+    public void addRotationMeasure(RotationMeasure accelMeasure) {
         SQLiteDatabase db = this.getWritableDatabase();
  
         ContentValues values = new ContentValues();
-        values.put(KEY_GYRO_TIME, accelMeasure.getTime());
-        values.put(KEY_GYRO_X, accelMeasure.getxSpeed());
-        values.put(KEY_GYRO_Y, accelMeasure.getySpeed());
-        values.put(KEY_GYRO_Z, accelMeasure.getzSpeed());
+        values.put(KEY_ROT_TIME, accelMeasure.getTime());
+        values.put(KEY_ROT_X, accelMeasure.getxRotation());
+        values.put(KEY_ROT_Y, accelMeasure.getyRotation());
+        values.put(KEY_ROT_Z, accelMeasure.getzRotation());
 
-        db.insert(TABLE_GYROSCOPE, null, values);
+        db.insert(TABLE_ROTATION, null, values);
     }
  
 
-    public ArrayList<GyroscopeMeasure> getGyroscopeMeasures(int beginTime) {
+    public ArrayList<RotationMeasure> getRotationMeasures(long beginTime) {
     	
         SQLiteDatabase db = this.getReadableDatabase();
-        ArrayList<GyroscopeMeasure> gyroMeasures = 
-        									new ArrayList<GyroscopeMeasure>();
+        ArrayList<RotationMeasure> rotationMeasures = 
+        									new ArrayList<RotationMeasure>();
  
-        Cursor cursor = db.query(TABLE_GYROSCOPE, new String[] 
-        		{ KEY_GYRO_TIME, KEY_GYRO_X, KEY_GYRO_Y, KEY_GYRO_Z }, 
-        		KEY_GYRO_TIME + ">?", new String[]{ String.valueOf(beginTime)},
+        Cursor cursor = db.query(TABLE_ROTATION, new String[] 
+        		{ KEY_ROT_TIME, KEY_ROT_X, KEY_ROT_Y, KEY_ROT_Z }, 
+        		KEY_ROT_TIME + ">?", new String[]{ String.valueOf(beginTime)},
         		null, null, null, null);
         
         if (cursor != null)
             cursor.moveToFirst();
         
-        while (cursor.isAfterLast()==false){
-        	gyroMeasures.add(new GyroscopeMeasure(cursor.getLong(0),
+        while (cursor.moveToNext()){
+        	rotationMeasures.add(new RotationMeasure(cursor.getLong(0),
                 cursor.getFloat(1), cursor.getFloat(2), cursor.getFloat(3)));
         }
         
         cursor.close();
-        return gyroMeasures;
+        return rotationMeasures;
     }
     
     public void deleteOldMeasures(long beginTime){
@@ -156,7 +154,7 @@ public class DatabaseManager extends SQLiteOpenHelper {
 
     	 db.rawQuery("DELETE FROM " + TABLE_ACCELEROMETER +" WHERE time < "
     			 			+String.valueOf(beginTime), null).moveToFirst() ;
-    	 db.rawQuery("DELETE FROM " + TABLE_GYROSCOPE +" WHERE time < " 
+    	 db.rawQuery("DELETE FROM " + TABLE_ROTATION +" WHERE time < " 
     			 			+String.valueOf(beginTime), null).moveToFirst() ;
     }
     

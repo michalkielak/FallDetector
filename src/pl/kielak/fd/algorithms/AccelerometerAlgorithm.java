@@ -43,13 +43,14 @@ public class AccelerometerAlgorithm implements FallDetectionAlgorithm{
 		stateNo=0;
 		currentStateTime = 0;
 		state = States.NORMAL;
+		
 		try{
 			measure = i.next();
 		}catch( NoSuchElementException e ){
 			return false;
 		}
-		int iterations = 0;
-		for (; i.hasNext();iterations++){
+
+		while (i.hasNext()){
 			nextMeasure = i.next();
 			currentStateTime+=(nextMeasure.getTime()-measure.getTime())/1000f;
 			

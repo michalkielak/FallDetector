@@ -2,6 +2,7 @@ package pl.kielak.fd.sensors;
 
 import pl.kielak.fd.database.AccelerometerMeasure;
 import pl.kielak.fd.database.DatabaseManager;
+import pl.kielak.fd.database.RotationMeasure;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -34,7 +35,13 @@ public class AccelerometerListener implements SensorEventListener {
 	    		currentTime, event.values[0], event.values[1], 
 	    		event.values[2], totalAccel);
 	    
+	    RotationMeasure rMeasure = new RotationMeasure(currentTime, 
+	    								Math.asin(event.values[0]/totalAccel),
+	    								Math.asin(event.values[1]/totalAccel),
+	    								Math.asin(event.values[2]/totalAccel));
+	    
 	    db.addAccelMeasure(mMeasure);
+	    db.addRotationMeasure(rMeasure);
     }
 	    
 }

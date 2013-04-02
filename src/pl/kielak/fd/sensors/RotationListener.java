@@ -1,12 +1,13 @@
 package pl.kielak.fd.sensors;
 
 import pl.kielak.fd.database.DatabaseManager;
-import pl.kielak.fd.database.GyroscopeMeasure;
+import pl.kielak.fd.database.RotationMeasure;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 
-public class GyroscopeListener implements SensorEventListener {
+public class RotationListener implements SensorEventListener {
 	/**
 	 * Listener of gyroscope. It collect every measure from gyroscope
 	 * and put it into table gyroscope in DB.
@@ -14,9 +15,11 @@ public class GyroscopeListener implements SensorEventListener {
 	 */
 	
 	private final DatabaseManager db;
+	private final SensorManager mSensorManager;
 	
-	public GyroscopeListener(DatabaseManager db){
+	public RotationListener(DatabaseManager db, SensorManager sensorManager){
 		this.db = db;
+		this.mSensorManager = sensorManager;
 	}
 	
  	@Override
@@ -27,11 +30,12 @@ public class GyroscopeListener implements SensorEventListener {
     @Override
     public void onSensorChanged(SensorEvent event) {
     	long currentTime = System.currentTimeMillis();
-	    GyroscopeMeasure mMeasure = new GyroscopeMeasure(
-	    		currentTime, event.values[0], event.values[1], 
+    	
+	    RotationMeasure mMeasure = new RotationMeasure(currentTime, 
+	    		event.values[0], event.values[1],
 	    		event.values[2]);
 	    
-	    db.addGyroMeasure(mMeasure);
+//	    db.addRotationMeasure(mMeasure);
     }
-	    
+
 }
