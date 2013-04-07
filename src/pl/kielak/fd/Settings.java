@@ -19,4 +19,10 @@ public class Settings{
 	//this variable determine how often (in seconds) algorithms computing 
 	//														should be performed
 	public static float ALGORITHM_CYCLE = 1f;
+	
+	//defined time when user can cancel alarm
+	public static long NOTIFICATION_SEND_TIME = 15;
+	
+	//phone number which will receive alarm notification
+	public static String ALARM_PHONE_NUMBER = "503992189";
 }

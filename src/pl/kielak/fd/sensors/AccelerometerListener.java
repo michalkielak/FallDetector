@@ -34,14 +34,15 @@ public class AccelerometerListener implements SensorEventListener {
 	    AccelerometerMeasure mMeasure = new AccelerometerMeasure(
 	    		currentTime, event.values[0], event.values[1], 
 	    		event.values[2], totalAccel);
-	    
-	    RotationMeasure rMeasure = new RotationMeasure(currentTime, 
+	    if (totalAccel > 7f & totalAccel < 13f){
+	    	RotationMeasure rMeasure = new RotationMeasure(currentTime, 
 	    								Math.asin(event.values[0]/totalAccel),
 	    								Math.asin(event.values[1]/totalAccel),
 	    								Math.asin(event.values[2]/totalAccel));
 	    
+	    	db.addRotationMeasure(rMeasure);
+	    }
 	    db.addAccelMeasure(mMeasure);
-	    db.addRotationMeasure(rMeasure);
     }
 	    
 }

@@ -6,11 +6,10 @@ import java.util.NoSuchElementException;
 
 import android.util.Log;
 import pl.kielak.fd.database.AccelerometerMeasure;
-import pl.kielak.fd.database.Measure;
 import pl.kielak.fd.Settings;
 
 
-public class AccelerometerAlgorithm implements FallDetectionAlgorithm{
+public class AccelerometerAlgorithm{
 	/**
 	 * Implementation of FallDetectionAlgorithm based on accelerometer.
 	 * Algorithm detects sudden decrease of total acceleration (free float),
@@ -37,7 +36,6 @@ public class AccelerometerAlgorithm implements FallDetectionAlgorithm{
 		state = States.NORMAL;
 	}
 	
-	@Override
 	public boolean run(List<AccelerometerMeasure> measures) {
 		Iterator<AccelerometerMeasure> i = measures.iterator();
 		stateNo=0;

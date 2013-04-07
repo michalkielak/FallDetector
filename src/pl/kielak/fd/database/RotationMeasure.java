@@ -11,13 +11,13 @@ public class RotationMeasure extends Measure{
 	private final double yRotation;
 	private final double zRotation;
 	
-	public RotationMeasure(long time, double d, double e,
-															double f)
+	public RotationMeasure(long time, double xRotation, double yRotation,
+															double zRotation)
 	{
 		this.time = time;
-		this.xRotation = d;
-		this.yRotation = e;
-		this.zRotation = f;
+		this.xRotation = xRotation;
+		this.yRotation = yRotation;
+		this.zRotation = zRotation;
 	}
 
 	public long getTime() {

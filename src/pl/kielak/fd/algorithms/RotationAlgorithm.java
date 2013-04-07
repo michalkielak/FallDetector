@@ -8,7 +8,7 @@ import android.util.Log;
 
 import pl.kielak.fd.database.RotationMeasure;
 
-public class RotationAlgorithm{ // implements FallDetectionAlgorithm{
+public class RotationAlgorithm{
 	
 	/**
 	 * Algorithm detects rotation of device. If rotation is greater then
